@@ -1,0 +1,63 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: kiara2
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: CarvajalKiaraExamen
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - dynamodb:*
+      Resource: 
+       - arn:aws:dynamodb:us-east-1:711387128226:table/BooksTable
+     
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+          
+  createBook:
+      handler: src/createBook.createBook
+      events:
+        - httpApi:
+            path: /books
+            method: post
+  getBook:
+    handler: src/getBook.getBook
+    events:
+      - httpApi:
+          path: /books
+          method: get
+
+  updateBook:
+    handler: src/updateBook.updateBook
+    events:
+      - httpApi:
+          path: /books/{bookId}
+          method: put
+
+  deleteBook:
+    handler: src/deleteBook.deleteBook
+    events:
+      - httpApi:
+          path: /books/{bookId}
+          method: delete
+
+resources:
+  Resources:
+    BooksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: BooksTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: bookId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bookId
+            KeyType: HASH
